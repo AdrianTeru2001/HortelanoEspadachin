@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inicio · Hortelano Espadachín</title>
+  <title>Inicio · PingaFlix</title>
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
 
   <!-- ========== BARRA DE NAVEGACIÓN ========== -->
   <header class="barra-superior" id="barra">
-    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+    <a href="/" class="logo no-seleccion">PingaFlix</a>
 
     <nav class="nav-enlaces">
       <a href="/" class="activo">Inicio</a>
@@ -20,9 +20,6 @@
 
     <div class="menu-usuario">
       <span class="nombre-usuario">{{usuario}}</span>
-      <div class="avatar no-seleccion" title="{{usuario}}">
-        {{usuario}}
-      </div>
       <form method="POST" action="/auth/logout">
         <button type="submit" class="btn btn-gris btn-mini">Salir</button>
       </form>
@@ -145,6 +142,6 @@
       barra.classList.toggle('fija', window.scrollY > 40);
     });
   </script>
-
+  <footer class="firma-sitio">Web creada por Adrián Teruel Reina</footer>
 </body>
 </html>

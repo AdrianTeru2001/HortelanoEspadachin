@@ -3,24 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de administración · Hortelano Espadachín</title>
+  <title>Panel de administración · PingaFlix</title>
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
 
   <!-- ========== BARRA DE NAVEGACIÓN ========== -->
   <header class="barra-superior fija" id="barra">
-    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+    <a href="/" class="logo no-seleccion">PingaFlix</a>
 
     <nav class="nav-enlaces">
       <a href="/">Inicio</a>
       <a href="/capitulos">Todos los capítulos</a>
       <a href="/panel" class="activo">⚙️ Admin</a>
     </nav>
-
     <div class="menu-usuario">
       <span class="nombre-usuario">{{usuario}}</span>
-      <div class="avatar no-seleccion" title="{{usuario}}">{{usuario}}</div>
       <form method="POST" action="/auth/logout">
         <button type="submit" class="btn btn-gris btn-mini">Salir</button>
       </form>
@@ -186,6 +184,7 @@
       caja.style.display = 'block';
     }
     if (exito === 'capitulo-subido') mostrarExito('✅ Capítulo subido correctamente.');
+    if (exito === 'capitulo-actualizado') mostrarExito('✅ Capítulo actualizado correctamente.');
     if (exito === 'capitulo-borrado') mostrarExito('🗑 Capítulo borrado.');
     if (accion === 'aprobado') mostrarExito('✅ Usuario aprobado. Ya puede entrar.');
     if (accion === 'rechazado') mostrarExito('🚫 Solicitud rechazada.');
@@ -252,27 +251,152 @@
     } else {
       capitulos.forEach(c => {
         const fila = document.createElement('tr');
-        const img = c.miniatura
-          ? `<img class="miniatura-tabla" src="${c.miniatura}" alt="">`
-          : `<div class="miniatura-tabla"></div>`;
+        const celdaMiniatura = document.createElement('td');
+        if (c.miniatura) {
+          const imagen = document.createElement('img');
+          imagen.className = 'miniatura-tabla';
+          imagen.src = c.miniatura;
+          imagen.alt = '';
+          celdaMiniatura.appendChild(imagen);
+        } else {
+          const marcador = document.createElement('div');
+          marcador.className = 'miniatura-tabla';
+          celdaMiniatura.appendChild(marcador);
+        }
 
-        fila.innerHTML = `
-          <td>${img}</td>
-          <td>
-            <a href="/capitulo/${c.id}" style="text-decoration:underline">
-              ${c.titulo}
-            </a>
-          </td>
-          <td>T${c.temporada} · E${c.episodio}</td>
-          <td>${c.duracion || '—'}</td>
-          <td>
-            <form method="POST" action="/admin/borrar"
-                  onsubmit="return confirm('¿Seguro que quieres borrar «${c.titulo}»?')">
-              <input type="hidden" name="id" value="${c.id}">
-              <button type="submit" class="btn btn-peligro btn-mini">Borrar</button>
-            </form>
-          </td>`;
-        tabla.appendChild(fila);
+        const celdaTitulo = document.createElement('td');
+        const enlace = document.createElement('a');
+        enlace.href = '/capitulo/' + c.id;
+        enlace.style.textDecoration = 'underline';
+        enlace.textContent = c.titulo;
+        celdaTitulo.appendChild(enlace);
+
+        const celdaOrden = document.createElement('td');
+        celdaOrden.textContent = `T${c.temporada} · E${c.episodio}`;
+
+        const celdaDuracion = document.createElement('td');
+        celdaDuracion.textContent = c.duracion || '—';
+
+        const celdaAcciones = document.createElement('td');
+        const botonEditar = document.createElement('button');
+        botonEditar.type = 'button';
+        botonEditar.className = 'btn btn-gris btn-mini';
+        botonEditar.textContent = 'Editar';
+        botonEditar.setAttribute('aria-expanded', 'false');
+        celdaAcciones.appendChild(botonEditar);
+
+        const formularioBorrar = document.createElement('form');
+        formularioBorrar.method = 'POST';
+        formularioBorrar.action = '/admin/borrar';
+        formularioBorrar.className = 'formulario-borrar-capitulo';
+        const idBorrar = document.createElement('input');
+        idBorrar.type = 'hidden';
+        idBorrar.name = 'id';
+        idBorrar.value = c.id;
+        const botonBorrar = document.createElement('button');
+        botonBorrar.type = 'submit';
+        botonBorrar.className = 'btn btn-peligro btn-mini';
+        botonBorrar.textContent = 'Borrar';
+        formularioBorrar.append(idBorrar, botonBorrar);
+        formularioBorrar.addEventListener('submit', event => {
+          if (!confirm(`¿Seguro que quieres borrar «${c.titulo}»?`)) {
+            event.preventDefault();
+          }
+        });
+        celdaAcciones.appendChild(formularioBorrar);
+
+        fila.append(celdaMiniatura, celdaTitulo, celdaOrden, celdaDuracion, celdaAcciones);
+
+        const filaEdicion = document.createElement('tr');
+        filaEdicion.className = 'fila-edicion-capitulo';
+        filaEdicion.hidden = true;
+        const celdaEdicion = document.createElement('td');
+        celdaEdicion.colSpan = 5;
+
+        const formularioEdicion = document.createElement('form');
+        formularioEdicion.method = 'POST';
+        formularioEdicion.action = '/admin/editar/' + c.id;
+        formularioEdicion.enctype = 'multipart/form-data';
+        formularioEdicion.className = 'formulario-edicion-capitulo';
+
+        function agregarCampo(etiquetaTexto, nombre, tipo, valor, opciones = {}) {
+          const contenedor = document.createElement('div');
+          contenedor.className = 'campo' + (opciones.ancho ? ' campo-ancho' : '');
+          const etiqueta = document.createElement('label');
+          const idCampo = `capitulo-${c.id}-${nombre}`;
+          etiqueta.htmlFor = idCampo;
+          etiqueta.textContent = etiquetaTexto;
+
+          const control = tipo === 'textarea'
+            ? document.createElement('textarea')
+            : document.createElement('input');
+          control.id = idCampo;
+          control.name = nombre;
+          if (tipo !== 'textarea') control.type = tipo;
+          if (valor !== undefined && tipo !== 'file') control.value = valor;
+          if (opciones.required) control.required = true;
+          if (opciones.min !== undefined) control.min = opciones.min;
+          if (opciones.accept) control.accept = opciones.accept;
+          contenedor.append(etiqueta, control);
+          formularioEdicion.appendChild(contenedor);
+          return control;
+        }
+
+        agregarCampo('Título *', 'titulo', 'text', c.titulo, { required: true });
+        agregarCampo('Temporada *', 'temporada', 'number', c.temporada, {
+          required: true,
+          min: 1,
+        });
+        agregarCampo('Episodio *', 'episodio', 'number', c.episodio, {
+          required: true,
+          min: 0,
+        });
+        agregarCampo('Duración', 'duracion', 'text', c.duracion || '');
+        agregarCampo('Sinopsis', 'sinopsis', 'textarea', c.sinopsis || '', { ancho: true });
+        agregarCampo('Sustituir vídeo (opcional)', 'video', 'file', undefined, {
+          accept: 'video/mp4,video/*',
+        });
+        agregarCampo('Sustituir miniatura (opcional)', 'miniatura', 'file', undefined, {
+          accept: 'image/*',
+        });
+
+        const contenedorBorrarMiniatura = document.createElement('div');
+        contenedorBorrarMiniatura.className = 'campo campo-ancho';
+        const etiquetaBorrarMiniatura = document.createElement('label');
+        const checkboxBorrarMiniatura = document.createElement('input');
+        checkboxBorrarMiniatura.type = 'checkbox';
+        checkboxBorrarMiniatura.name = 'borrarMiniatura';
+        checkboxBorrarMiniatura.value = '1';
+        checkboxBorrarMiniatura.disabled = !c.miniatura;
+        etiquetaBorrarMiniatura.append(
+          checkboxBorrarMiniatura,
+          document.createTextNode(' Eliminar la miniatura actual')
+        );
+        contenedorBorrarMiniatura.appendChild(etiquetaBorrarMiniatura);
+        formularioEdicion.appendChild(contenedorBorrarMiniatura);
+
+        const accionesEdicion = document.createElement('div');
+        accionesEdicion.className = 'acciones-edicion-capitulo';
+        const botonGuardar = document.createElement('button');
+        botonGuardar.type = 'submit';
+        botonGuardar.className = 'btn btn-rojo btn-mini';
+        botonGuardar.textContent = 'Guardar cambios';
+        accionesEdicion.appendChild(botonGuardar);
+        formularioEdicion.appendChild(accionesEdicion);
+        formularioEdicion.addEventListener('submit', () => {
+          botonGuardar.disabled = true;
+          botonGuardar.textContent = 'Guardando…';
+        });
+
+        celdaEdicion.appendChild(formularioEdicion);
+        filaEdicion.appendChild(celdaEdicion);
+        botonEditar.addEventListener('click', () => {
+          filaEdicion.hidden = !filaEdicion.hidden;
+          botonEditar.setAttribute('aria-expanded', String(!filaEdicion.hidden));
+          botonEditar.textContent = filaEdicion.hidden ? 'Editar' : 'Cancelar';
+        });
+
+        tabla.append(fila, filaEdicion);
       });
     }
 
@@ -371,6 +495,6 @@
       document.getElementById('btn-subir').textContent = 'Subiendo…';
     });
   </script>
-
+  <footer class="firma-sitio">Web creada por Adrián Teruel Reina</footer>
 </body>
 </html>

@@ -29,7 +29,7 @@ Luego abre **http://localhost:3000**
 | `/login` | Iniciar sesión |
 | `/registro` | Crear cuenta (queda **pendiente** hasta que la apruebes) |
 | `/esperando` | Pantalla que ven tus amigos mientras esperan tu aprobación |
-| `/panel` | **Solo tú**: aprobar usuarios y subir/borrar capítulos |
+| `/panel` | **Solo tú**: aprobar usuarios y subir, editar o borrar capítulos |
 
 ### Rutas de acción (formularios)
 
@@ -42,6 +42,7 @@ Luego abre **http://localhost:3000**
 | `POST /auth/aprobar` | **solo admin** | Aprueba a cualquier usuario |
 | `POST /auth/rechazar` | **solo admin** | Rechaza o revoca el acceso |
 | `POST /admin/subir` | **solo admin** | Sube un capítulo (vídeo + miniatura) |
+| `POST /admin/editar/:id` | **solo admin** | Modifica los datos y, opcionalmente, el vídeo o la miniatura |
 | `POST /admin/borrar` | **solo admin** | Borra un capítulo y sus archivos |
 | `GET /videos/:id` | aprobados | Sirve el MP4 (con seek) |
 | `GET /miniaturas/:archivo` | aprobados | Sirve la imagen de portada |

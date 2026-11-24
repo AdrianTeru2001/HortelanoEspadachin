@@ -65,6 +65,28 @@ const subida = multer({
   limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2 GB
 });
 
+function borrarArchivo(carpeta, nombre) {
+  if (!nombre) return;
+
+  const ruta = path.join(carpeta, path.basename(nombre));
+  try {
+    fs.unlinkSync(ruta);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`No se pudo borrar el archivo "${ruta}":`, err);
+    }
+  }
+}
+
+function borrarArchivosSubidos(files) {
+  for (const campo of Object.values(files || {})) {
+    for (const archivo of campo) {
+      const carpeta = archivo.fieldname === 'video' ? CARPETA_VIDEOS : CARPETA_MINIATURAS;
+      borrarArchivo(carpeta, archivo.filename);
+    }
+  }
+}
+
 // ------------------------------------------------------------
 // GET /admin → la propia página del panel
 // (la lógica de pintarla está en rutas/paginas.js, pero
@@ -116,14 +138,94 @@ router.post('/subir', subida.fields([
     });
     return res.redirect('/panel?exito=capitulo-subido');
   } catch (err) {
-    // Borramos el vídeo que acabamos de guardar si falló la BD
-    try { fs.unlinkSync(path.join(CARPETA_VIDEOS, archivoVideo.filename)); } catch (_) {}
+    borrarArchivosSubidos(req.files);
     if (err.message && err.message.includes('UNIQUE')) {
       return error('Ya existe un capítulo con esa temporada y episodio.');
     }
     console.error(err);
     return error('No se pudo guardar el capítulo.');
   }
+});
+
+// ------------------------------------------------------------
+// POST /admin/editar/:id → actualiza los datos y archivos de un capítulo
+// ------------------------------------------------------------
+router.post('/editar/:id', (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return res.redirect('/panel?error=' + encodeURIComponent('El capítulo indicado no es válido.'));
+  }
+  if (!consultas.capituloPorId.get(id)) {
+    return res.redirect('/panel?error=' + encodeURIComponent('No existe ese capítulo.'));
+  }
+  next();
+}, subida.fields([
+  { name: 'video', maxCount: 1 },
+  { name: 'miniatura', maxCount: 1 },
+]), (req, res) => {
+  const id = Number(req.params.id);
+  const capitulo = consultas.capituloPorId.get(id);
+  if (!capitulo) {
+    borrarArchivosSubidos(req.files);
+    return res.redirect('/panel?error=' + encodeURIComponent('No existe ese capítulo.'));
+  }
+
+  const { titulo, temporada, episodio, sinopsis, duracion } = req.body;
+  const temporadaNumero = Number(temporada);
+  const episodioNumero = Number(episodio);
+  const archivoVideo = req.files && req.files.video && req.files.video[0];
+  const archivoMiniatura = req.files && req.files.miniatura && req.files.miniatura[0];
+
+  const error = (mensaje) => {
+    borrarArchivosSubidos(req.files);
+    return res.redirect('/panel?error=' + encodeURIComponent(mensaje));
+  };
+
+  if (typeof titulo !== 'string' || !titulo.trim()) {
+    return error('El título es obligatorio.');
+  }
+  if (typeof temporada !== 'string' || !/^\d+$/.test(temporada) ||
+      !Number.isSafeInteger(temporadaNumero) || temporadaNumero < 1) {
+    return error('La temporada debe ser un número entero mayor que cero.');
+  }
+  if (typeof episodio !== 'string' || !/^\d+$/.test(episodio) ||
+      !Number.isSafeInteger(episodioNumero) || episodioNumero < 0) {
+    return error('El episodio debe ser un número entero igual o mayor que cero.');
+  }
+
+  const borrarMiniatura = req.body.borrarMiniatura === '1' && !archivoMiniatura;
+  const rutaVideo = archivoVideo ? archivoVideo.filename : capitulo.ruta_video;
+  const rutaMiniatura = archivoMiniatura
+    ? archivoMiniatura.filename
+    : borrarMiniatura ? '' : capitulo.ruta_miniatura;
+
+  try {
+    consultas.actualizarCapitulo.run({
+      id,
+      titulo: titulo.trim(),
+      temporada: temporadaNumero,
+      episodio: episodioNumero,
+      sinopsis: typeof sinopsis === 'string' ? sinopsis : '',
+      duracion: typeof duracion === 'string' ? duracion.trim() : '',
+      ruta_video: rutaVideo,
+      ruta_miniatura: rutaMiniatura,
+    });
+  } catch (err) {
+    borrarArchivosSubidos(req.files);
+    if (err.message && err.message.includes('UNIQUE')) {
+      return res.redirect('/panel?error=' +
+        encodeURIComponent('Ya existe un capítulo con esa temporada y episodio.'));
+    }
+    console.error('No se pudo actualizar el capítulo:', err);
+    return res.redirect('/panel?error=' + encodeURIComponent('No se pudo actualizar el capítulo.'));
+  }
+
+  if (archivoVideo) borrarArchivo(CARPETA_VIDEOS, capitulo.ruta_video);
+  if (archivoMiniatura || borrarMiniatura) {
+    borrarArchivo(CARPETA_MINIATURAS, capitulo.ruta_miniatura);
+  }
+
+  return res.redirect('/panel?exito=capitulo-actualizado');
 });
 
 // ------------------------------------------------------------
@@ -142,7 +244,7 @@ router.post('/borrar', (req, res) => {
     for (const archivo of [capitulo.ruta_video, capitulo.ruta_miniatura]) {
       if (!archivo) continue;
       const carpeta = archivo === capitulo.ruta_video ? CARPETA_VIDEOS : CARPETA_MINIATURAS;
-      try { fs.unlinkSync(path.join(carpeta, path.basename(archivo))); } catch (_) {}
+      borrarArchivo(carpeta, archivo);
     }
     return res.redirect('/panel?exito=capitulo-borrado');
   } catch (err) {

@@ -3,24 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Todos los capítulos · Hortelano Espadachín</title>
+  <title>Todos los capítulos · PingaFlix</title>
   <link rel="stylesheet" href="/css/estilos.css">
 </head>
 <body>
 
   <!-- ========== BARRA DE NAVEGACIÓN ========== -->
   <header class="barra-superior fija" id="barra">
-    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+    <a href="/" class="logo no-seleccion">PingaFlix</a>
 
     <nav class="nav-enlaces">
       <a href="/">Inicio</a>
       <a href="/capitulos" class="activo">Todos los capítulos</a>
       {{enlaceAdmin}}
     </nav>
-
     <div class="menu-usuario">
       <span class="nombre-usuario">{{usuario}}</span>
-      <div class="avatar no-seleccion" title="{{usuario}}">{{usuario}}</div>
       <form method="POST" action="/auth/logout">
         <button type="submit" class="btn btn-gris btn-mini">Salir</button>
       </form>
@@ -124,6 +122,6 @@
 
     pintar(); // Primer pintado
   </script>
-
+  <footer class="firma-sitio">Web creada por Adrián Teruel Reina</footer>
 </body>
 </html>

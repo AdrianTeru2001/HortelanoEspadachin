@@ -139,6 +139,7 @@ const consultas = {
         episodio = @episodio,
         sinopsis = @sinopsis,
         duracion = @duracion,
+        ruta_video = @ruta_video,
         ruta_miniatura = @ruta_miniatura
     WHERE id = @id
   `),
