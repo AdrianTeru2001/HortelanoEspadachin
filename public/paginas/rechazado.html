@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitud rechazada · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <div class="pantalla-estado">
+    <div class="tarjeta-estado">
+
+      <div class="icono-estado">🚫</div>
+      <h1>Solicitud rechazada</h1>
+
+      <p>
+        Hola, <strong>{{usuario}}</strong>. Tu solicitud de acceso ha sido
+        rechazada por el administrador.
+      </p>
+      <p>
+        Si crees que ha sido un error, o quieres intentarlo otra vez,
+        puedes <strong>volver a pedir acceso</strong> aquí abajo.
+      </p>
+
+      <!-- El usuario rechazado se vuelve a poner en cola de espera -->
+      <form method="POST" action="/auth/volver-a-pedir" style="margin-top:24px">
+        <button type="submit" class="btn btn-rojo" style="width:100%">
+          🙋 Volver a pedir acceso
+        </button>
+      </form>
+
+      <form method="POST" action="/auth/logout" style="margin-top:12px">
+        <button type="submit" class="btn btn-gris" style="width:100%">
+          Cerrar sesión
+        </button>
+      </form>
+
+      <p class="enlace-inferior" style="font-size:13px">
+        Al pulsar, el administrador verá tu solicitud otra vez en su panel.
+      </p>
+
+    </div>
+  </div>
+</body>
+</html>

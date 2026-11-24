@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esperando aprobación · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <div class="pantalla-estado">
+    <div class="tarjeta-estado">
+
+      <div class="icono-estado">⏳</div>
+      <h1>Solicitud pendiente<span class="punto-espera"></span></h1>
+
+      <!-- Aviso de confirmación (aparece solo tras "volver a pedir") -->
+      {{avisoHTML}}
+
+      <p>
+        Hola, <strong>{{usuario}}</strong>. Tu cuenta se ha creado correctamente,
+        pero todavía no puedes ver los capítulos.
+      </p>
+      <p>
+        El administrador tiene que <strong>aprobar tu solicitud</strong> antes
+        de darte acceso. Cuando lo haga, podrás entrar cuando quieras.
+      </p>
+
+      <div class="aviso aviso-info" style="text-align:left; margin-top:22px">
+        📌 Puedes cerrar esta pestaña. Vuelve a intentarlo en un rato
+        iniciando sesión: si ya te han aprobado, entrarás directamente.
+      </div>
+
+      <form method="POST" action="/auth/logout" style="margin-top:22px">
+        <button type="submit" class="btn btn-gris">Cerrar sesión</button>
+      </form>
+
+    </div>
+  </div>
+</body>
+</html>

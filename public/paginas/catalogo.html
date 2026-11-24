@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todos los capítulos · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+
+  <!-- ========== BARRA DE NAVEGACIÓN ========== -->
+  <header class="barra-superior fija" id="barra">
+    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+
+    <nav class="nav-enlaces">
+      <a href="/">Inicio</a>
+      <a href="/capitulos" class="activo">Todos los capítulos</a>
+      {{enlaceAdmin}}
+    </nav>
+
+    <div class="menu-usuario">
+      <span class="nombre-usuario">{{usuario}}</span>
+      <div class="avatar no-seleccion" title="{{usuario}}">{{usuario}}</div>
+      <form method="POST" action="/auth/logout">
+        <button type="submit" class="btn btn-gris btn-mini">Salir</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- ========== CONTENIDO ========== -->
+  <main class="pagina-contenido">
+    <h1 class="pagina-titulo">Todos los capítulos</h1>
+    <p class="pagina-subtitulo">
+      <span id="contador">{{totalCapitulos}}</span> capítulos disponibles
+    </p>
+
+    <!-- Barra de herramientas: buscador + filtro de temporada -->
+    <div class="barra-herramientas">
+      <input type="text" class="buscador" id="buscador"
+             placeholder="🔍 Buscar por título o sinopsis…">
+      <select class="filtro-temporada" id="filtro-temporada">
+        <option value="">Todas las temporadas</option>
+      </select>
+    </div>
+
+    <!-- Aquí se pintan las tarjetas con JavaScript -->
+    <div class="cuadricula" id="cuadricula"></div>
+  </main>
+
+  <script>
+    const capitulos = {{capitulosJSON}};
+
+    const cuadricula = document.getElementById('cuadricula');
+    const buscador = document.getElementById('buscador');
+    const filtroTemporada = document.getElementById('filtro-temporada');
+
+    // ---------- Rellenar el desplegable de temporadas ----------
+    // Sacamos los números de temporada únicos del array
+    const temporadas = [...new Set(capitulos.map(c => c.temporada))].sort();
+    temporadas.forEach(t => {
+      const opcion = document.createElement('option');
+      opcion.value = t;
+      opcion.textContent = 'Temporada ' + t;
+      filtroTemporada.appendChild(opcion);
+    });
+
+    // ---------- Crear tarjeta ----------
+    function crearTarjeta(c) {
+      const enlace = document.createElement('a');
+      enlace.href = '/capitulo/' + c.id;
+      enlace.className = 'tarjeta';
+
+      const imagen = c.miniatura
+        ? `<img class="tarjeta-imagen" src="${c.miniatura}" alt="${c.titulo}"
+                 loading="lazy">`
+        : `<div class="tarjeta-imagen placeholder">${c.titulo.charAt(0)}</div>`;
+
+      enlace.innerHTML = `
+        ${imagen}
+        <div class="tarjeta-play"></div>
+        <div class="tarjeta-cuerpo">
+          <div class="tarjeta-etiqueta">${c.etiqueta}</div>
+          <div class="tarjeta-titulo">${c.titulo}</div>
+          <div class="tarjeta-sinopsis">${c.sinopsis || ''}</div>
+          <div class="tarjeta-pie">
+            <span>Episodio ${c.episodio}</span>
+            <span>${c.duracion || ''}</span>
+          </div>
+        </div>`;
+      return enlace;
+    }
+
+    // ---------- Pintar según los filtros actuales ----------
+    function pintar() {
+      const texto = buscador.value.toLowerCase().trim();
+      const temporada = filtroTemporada.value;
+
+      const filtrados = capitulos.filter(c => {
+        const coincideTexto =
+          c.titulo.toLowerCase().includes(texto) ||
+          (c.sinopsis || '').toLowerCase().includes(texto);
+        const coincideTemporada =
+          !temporada || String(c.temporada) === temporada;
+        return coincideTexto && coincideTemporada;
+      });
+
+      cuadricula.innerHTML = '';
+
+      if (filtrados.length === 0) {
+        cuadricula.innerHTML =
+          `<div class="resultado-vacio">
+             No se han encontrado capítulos con esos criterios.
+           </div>`;
+        return;
+      }
+
+      filtrados.forEach(c => cuadricula.appendChild(crearTarjeta(c)));
+      document.getElementById('contador').textContent = filtrados.length;
+    }
+
+    // Se repinta cada vez que el usuario escribe o cambia el filtro
+    buscador.addEventListener('input', pintar);
+    filtroTemporada.addEventListener('change', pintar);
+
+    pintar(); // Primer pintado
+  </script>
+
+</body>
+</html>

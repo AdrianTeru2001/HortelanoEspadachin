@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <div class="pantalla-acceso">
+    <div class="caja-acceso">
+
+      <div class="logo-acceso">HORTELANO <span style="color:#fff">ESPADACHÍN</span></div>
+      <p class="subtitulo-acceso">Entrar para ver los capítulos</p>
+
+      <!-- Mensaje de error, si viene alguno en la URL -->
+      <div class="aviso aviso-error" id="caja-error" style="display:none"></div>
+
+      <form method="POST" action="/auth/login">
+        <div class="campo">
+          <label for="nombre">Nombre de usuario</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="username" required>
+        </div>
+
+        <div class="campo">
+          <label for="contrasena">Contraseña</label>
+          <input type="password" id="contrasena" name="contrasena" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn btn-rojo" style="width:100%; margin-top:8px">
+          Entrar
+        </button>
+      </form>
+
+      <p class="enlace-inferior">
+        ¿Aún no tienes cuenta? <a href="/registro">Pide acceso aquí</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script>
+    // Leemos el parámetro "error" de la URL y lo mostramos
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error) {
+      const caja = document.getElementById('caja-error');
+      caja.textContent = error;
+      caja.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

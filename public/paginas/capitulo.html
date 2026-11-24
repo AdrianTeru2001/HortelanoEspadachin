@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{titulo}} · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+
+  <!-- ========== BARRA DE NAVEGACIÓN ========== -->
+  <header class="barra-superior fija" id="barra">
+    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+
+    <nav class="nav-enlaces">
+      <a href="/">Inicio</a>
+      <a href="/capitulos">Todos los capítulos</a>
+      {{enlaceAdmin}}
+    </nav>
+
+    <div class="menu-usuario">
+      <span class="nombre-usuario">{{usuario}}</span>
+      <div class="avatar no-seleccion" title="{{usuario}}">{{usuario}}</div>
+      <form method="POST" action="/auth/logout">
+        <button type="submit" class="btn btn-gris btn-mini">Salir</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- ========== CONTENIDO ========== -->
+  <main class="pagina-capitulo">
+
+    <a href="/capitulos" class="volver">← Volver al catálogo</a>
+
+    <!-- El reproductor.
+         `src` apunta a /videos/:id, que es la ruta PROTEGIDA:
+         si no estás logueado y aprobado, el vídeo no carga. -->
+    <div class="reproductor-marco">
+      <video id="reproductor" controls preload="metadata"
+             poster="{{miniatura}}">
+        <source src="/videos/{{id}}" type="video/mp4">
+        Tu navegador no soporta la reproducción de vídeo.
+      </video>
+    </div>
+
+    <!-- Ficha del capítulo -->
+    <div class="ficha-capitulo">
+      <div class="ficha-texto">
+        <div class="ficha-etiqueta">{{etiqueta}}</div>
+        <h1 class="ficha-titulo">{{titulo}}</h1>
+
+        <div class="ficha-meta">
+          <span>🎬 Capítulo {{episodio}}</span>
+          <span>📅 Temporada {{temporada}}</span>
+          {{duracionMetaHTML}}
+        </div>
+
+        <p class="ficha-sinopsis">{{sinopsis}}</p>
+      </div>
+    </div>
+
+    <!-- Botón de siguiente episodio (solo si existe) -->
+    {{bloqueSiguienteHTML}}
+
+  </main>
+
+  <script>
+    // Barra que se vuelve sólida al hacer scroll
+    const barra = document.getElementById('barra');
+    window.addEventListener('scroll', () => {
+      barra.classList.toggle('fija', window.scrollY > 40);
+    });
+
+    // ---------------------------------------------------------
+    // Guardar dónde se quedó el usuario.
+    // Cuando vuelve a entrar al capítulo, lo reanudamos donde
+    // estaba (como hace Netflix con tu progreso).
+    // ---------------------------------------------------------
+    const CLAVE_PROGRESO = 'progreso_capitulo_{{id}}';
+    const video = document.getElementById('reproductor');
+
+    video.addEventListener('loadedmetadata', () => {
+      const guardado = localStorage.getItem(CLAVE_PROGRESO);
+      if (guardado && Number(guardado) > 5) {
+        video.currentTime = Number(guardado);
+      }
+    });
+
+    // Guardamos la posición cada pocos segundos
+    let ultimaGuardada = 0;
+    video.addEventListener('timeupdate', () => {
+      if (video.currentTime - ultimaGuardada > 5) {
+        ultimaGuardada = video.currentTime;
+        localStorage.setItem(CLAVE_PROGRESO, String(video.currentTime));
+      }
+    });
+
+    // Al terminar el capítulo, ofrecemos el siguiente
+    video.addEventListener('ended', () => {
+      const idSiguiente = '{{siguienteId}}';
+      if (idSiguiente) {
+        if (confirm('¿Reproducir el siguiente episodio?')) {
+          window.location.href = '/capitulo/' + idSiguiente;
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

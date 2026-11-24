@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <div class="pantalla-acceso">
+    <div class="caja-acceso">
+
+      <div class="logo-acceso">HORTELANO <span style="color:#fff">ESPADACHÍN</span></div>
+      <p class="subtitulo-acceso">Crea tu cuenta para pedir acceso</p>
+
+      <div class="aviso aviso-error" id="caja-error" style="display:none"></div>
+
+      <!-- Aviso especial solo si AÚN NO existe administrador -->
+      <div class="nota-primero" id="nota-primero" style="display:none">
+        👑 <strong>Primer registro:</strong> quien se registre ahora será el
+        <strong>administrador</strong> de la web y tendrá acceso total.
+      </div>
+
+      <form method="POST" action="/auth/registro">
+        <div class="campo">
+          <label for="nombre">Nombre de usuario</label>
+          <input type="text" id="nombre" name="nombre" minlength="3" required
+                 placeholder="Ej: juanmi">
+        </div>
+
+        <div class="campo">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" name="email" required
+                 placeholder="tu@email.com">
+        </div>
+
+        <div class="campo">
+          <label for="contrasena">Contraseña</label>
+          <input type="password" id="contrasena" name="contrasena"
+                 minlength="6" autocomplete="new-password" required
+                 placeholder="Mínimo 6 caracteres">
+        </div>
+
+        <div class="campo">
+          <label for="repetir">Repite la contraseña</label>
+          <input type="password" id="repetir" name="repetir"
+                 minlength="6" autocomplete="new-password" required>
+        </div>
+
+        <button type="submit" class="btn btn-rojo" style="width:100%; margin-top:8px">
+          Crear cuenta
+        </button>
+      </form>
+
+      <p class="enlace-inferior">
+        ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+      </p>
+
+      <p class="enlace-inferior" style="font-size:12px; color:#777">
+        Tus amigos deberán esperar a que el administrador apruebe su solicitud.
+      </p>
+
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const error = params.get('error');
+    if (error) {
+      const caja = document.getElementById('caja-error');
+      caja.textContent = error;
+      caja.style.display = 'block';
+    }
+
+    // Mostramos la nota de "primer usuario = admin" solo si el
+    // servidor la indica (variable {{esPrimerUsuario}})
+    if ('{{esPrimerUsuario}}' === '1') {
+      document.getElementById('nota-primero').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

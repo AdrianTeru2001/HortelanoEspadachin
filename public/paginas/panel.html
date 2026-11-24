@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de administración · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+
+  <!-- ========== BARRA DE NAVEGACIÓN ========== -->
+  <header class="barra-superior fija" id="barra">
+    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+
+    <nav class="nav-enlaces">
+      <a href="/">Inicio</a>
+      <a href="/capitulos">Todos los capítulos</a>
+      <a href="/panel" class="activo">⚙️ Admin</a>
+    </nav>
+
+    <div class="menu-usuario">
+      <span class="nombre-usuario">{{usuario}}</span>
+      <div class="avatar no-seleccion" title="{{usuario}}">{{usuario}}</div>
+      <form method="POST" action="/auth/logout">
+        <button type="submit" class="btn btn-gris btn-mini">Salir</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- ========== CONTENIDO ========== -->
+  <main class="panel">
+    <h1 class="panel-titulo">Panel de administración</h1>
+    <p class="panel-subtitulo">Gestiona los usuarios y los capítulos de la serie.</p>
+
+    <!-- Mensajes de error / éxito -->
+    <div class="aviso aviso-error" id="caja-error" style="display:none"></div>
+    <div class="aviso aviso-exito" id="caja-exito" style="display:none"></div>
+
+    <!-- ========== ESTADÍSTICAS ========== -->
+    <div class="estadisticas">
+      <div class="estadistica">
+        <div class="valor" id="stat-pendientes">0</div>
+        <div class="etiqueta">Solicitudes pendientes</div>
+      </div>
+      <div class="estadistica">
+        <div class="valor" id="stat-aprobados">0</div>
+        <div class="etiqueta">Usuarios aprobados</div>
+      </div>
+      <div class="estadistica">
+        <div class="valor" id="stat-capitulos">{{totalCapitulos}}</div>
+        <div class="etiqueta">Capítulos subidos</div>
+      </div>
+    </div>
+
+    <!-- ========== 1. SOLICITUDES PENDIENTES ========== -->
+    <section class="seccion-panel">
+      <h2>📨 Solicitudes de acceso <span class="insignia insignia-pendiente"
+            id="insignia-pendientes">0</span></h2>
+      <p class="descripcion">
+        Cuando alguien se registre, aparecerá aquí. Aprueba solo a quien quieras:
+        hasta entonces no podrá ver nada.
+      </p>
+      <div class="lista-usuarios" id="lista-pendientes"></div>
+    </section>
+
+    <!-- ========== 2. SUBIR CAPÍTULO ========== -->
+    <section class="seccion-panel">
+      <h2>⬆️ Subir un capítulo nuevo</h2>
+      <p class="descripcion">
+        Rellena los datos y elige el archivo MP4. La subida puede tardar según
+        el tamaño del vídeo.
+      </p>
+
+      <form method="POST" action="/admin/subir"
+            enctype="multipart/form-data" id="form-subida">
+
+        <div class="formulario-subida">
+          <div class="campo">
+            <label for="titulo">Título *</label>
+            <input type="text" id="titulo" name="titulo" required>
+          </div>
+
+          <div class="campo">
+            <label for="temporada">Temporada *</label>
+            <input type="number" id="temporada" name="temporada" value="1"
+                   min="1" required>
+          </div>
+
+          <div class="campo">
+            <label for="episodio">Episodio *</label>
+            <input type="number" id="episodio" name="episodio" min="0" required>
+          </div>
+
+          <div class="campo">
+            <label for="duracion">Duración (opcional)</label>
+            <input type="text" id="duracion" name="duracion"
+                   placeholder="Ej: 12:34">
+          </div>
+
+          <div class="campo campo-ancho">
+            <label for="sinopsis">Sinopsis</label>
+            <textarea id="sinopsis" name="sinopsis"
+                      placeholder="Breve descripción del capítulo…"></textarea>
+          </div>
+
+          <div class="campo">
+            <label>Vídeo MP4 *</label>
+            <label class="campo-archivo">
+              <input type="file" name="video" accept="video/mp4,video/*" required>
+              <span class="texto-archivo" id="texto-video">
+                🎬 Elegir archivo de vídeo…
+              </span>
+            </label>
+          </div>
+
+          <div class="campo">
+            <label>Miniatura (opcional)</label>
+            <label class="campo-archivo">
+              <input type="file" name="miniatura" accept="image/*">
+              <span class="texto-archivo" id="texto-miniatura">
+                🖼 Elegir imagen…
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-rojo" id="btn-subir"
+                style="margin-top:18px">
+          Subir capítulo
+        </button>
+        <p class="descripcion" id="aviso-subida" style="margin-top:10px; display:none">
+          ⏳ Subiendo… por favor, no cierres esta pestaña.
+        </p>
+      </form>
+    </section>
+
+    <!-- ========== 3. CAPÍTULOS SUBIDOS ========== -->
+    <section class="seccion-panel">
+      <h2>🎞 Capítulos subidos</h2>
+      <p class="descripcion">Bórralos si te equivocaste al subir alguno.</p>
+      <div style="overflow-x:auto">
+        <table class="tabla-capitulos">
+          <thead>
+            <tr>
+              <th>Miniatura</th>
+              <th>Título</th>
+              <th>Temp. / Epi.</th>
+              <th>Duración</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabla-capitulos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 4. TODOS LOS USUARIOS ========== -->
+    <section class="seccion-panel">
+      <h2>👥 Todos los usuarios</h2>
+      <p class="descripcion">
+        Listado completo con su estado. Puedes cambiarlo cuando quieras:
+        <strong>aprobar</strong> a quien se haya quedado fuera sin querer, o
+        <strong>revocar</strong> el acceso de quien ya no deba ver la web.
+      </p>
+      <div class="lista-usuarios" id="lista-todos"></div>
+    </section>
+
+  </main>
+
+  <script>
+    // Datos que manda el servidor (JSON listo para usar)
+    const pendientes = {{pendientesJSON}};
+    const todosUsuarios = {{usuariosJSON}};
+    const capitulos = {{capitulosJSON}};
+
+    // ---------- Mensajes de error / éxito desde la URL ----------
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const exito = params.get('exito');
+    const accion = params.get('accion');
+    const bienvenida = params.get('bienvenida');
+
+    if (error) {
+      const caja = document.getElementById('caja-error');
+      caja.textContent = '⚠️ ' + error;
+      caja.style.display = 'block';
+    }
+    if (exito === 'capitulo-subido') mostrarExito('✅ Capítulo subido correctamente.');
+    if (exito === 'capitulo-borrado') mostrarExito('🗑 Capítulo borrado.');
+    if (accion === 'aprobado') mostrarExito('✅ Usuario aprobado. Ya puede entrar.');
+    if (accion === 'rechazado') mostrarExito('🚫 Solicitud rechazada.');
+    if (bienvenida) {
+      mostrarExito('👑 ¡Bienvenido! Eres el administrador de la web.');
+    }
+
+    function mostrarExito(texto) {
+      const caja = document.getElementById('caja-exito');
+      caja.textContent = texto;
+      caja.style.display = 'block';
+    }
+
+    // ---------- Pintar estadísticas ----------
+    const aprobados = todosUsuarios.filter(u => u.estado === 'aprobado');
+    const rechazados = todosUsuarios.filter(u => u.estado === 'rechazado');
+    const pendientesCount = pendientes.length;
+
+    document.getElementById('stat-pendientes').textContent = pendientesCount;
+    document.getElementById('stat-aprobados').textContent = aprobados.length;
+    document.getElementById('insignia-pendientes').textContent = pendientesCount;
+
+    // Ocultamos la sección si no hay solicitudes
+    if (pendientesCount === 0) {
+      document.getElementById('lista-pendientes').innerHTML =
+        `<p class="descripcion" style="margin:0">
+           No hay solicitudes pendientes. Todo al día 🎉
+         </p>`;
+    }
+
+    // ---------- Lista de pendientes con botones ----------
+    const listaPendientes = document.getElementById('lista-pendientes');
+    pendientes.forEach(u => {
+      const fila = document.createElement('div');
+      fila.className = 'usuario-fila';
+      fila.innerHTML = `
+        <div class="usuario-info">
+          <div class="avatar">${u.nombre.charAt(0)}</div>
+          <div class="usuario-datos">
+            <div class="nombre">${u.nombre}</div>
+            <div class="email">${u.email}</div>
+          </div>
+        </div>
+        <div class="usuario-acciones">
+          <form method="POST" action="/auth/aprobar">
+            <input type="hidden" name="id" value="${u.id}">
+            <button type="submit" class="btn btn-verde btn-mini">✅ Aprobar</button>
+          </form>
+          <form method="POST" action="/auth/rechazar">
+            <input type="hidden" name="id" value="${u.id}">
+            <button type="submit" class="btn btn-peligro btn-mini">❌ Rechazar</button>
+          </form>
+        </div>`;
+      listaPendientes.appendChild(fila);
+    });
+
+    // ---------- Tabla de capítulos ----------
+    const tabla = document.getElementById('tabla-capitulos');
+    if (capitulos.length === 0) {
+      tabla.innerHTML =
+        `<tr><td colspan="5" style="color:#b3b3b3; text-align:center; padding:24px">
+           Aún no has subido ningún capítulo.
+         </td></tr>`;
+    } else {
+      capitulos.forEach(c => {
+        const fila = document.createElement('tr');
+        const img = c.miniatura
+          ? `<img class="miniatura-tabla" src="${c.miniatura}" alt="">`
+          : `<div class="miniatura-tabla"></div>`;
+
+        fila.innerHTML = `
+          <td>${img}</td>
+          <td>
+            <a href="/capitulo/${c.id}" style="text-decoration:underline">
+              ${c.titulo}
+            </a>
+          </td>
+          <td>T${c.temporada} · E${c.episodio}</td>
+          <td>${c.duracion || '—'}</td>
+          <td>
+            <form method="POST" action="/admin/borrar"
+                  onsubmit="return confirm('¿Seguro que quieres borrar «${c.titulo}»?')">
+              <input type="hidden" name="id" value="${c.id}">
+              <button type="submit" class="btn btn-peligro btn-mini">Borrar</button>
+            </form>
+          </td>`;
+        tabla.appendChild(fila);
+      });
+    }
+
+    // ---------- Listado completo de usuarios ----------
+    const listaTodos = document.getElementById('lista-todos');
+    const adminId = {{adminId}};
+
+    // Quitamos comillas/chevrons del nombre para poder meterlo
+    // con seguridad dentro del confirm() del atributo HTML
+    const limpio = (s) => String(s).replace(/['"\\<>]/g, '');
+
+    todosUsuarios.forEach(u => {
+      const insignia =
+        u.es_admin ? 'insignia-admin' :
+        u.estado === 'aprobado' ? 'insignia-aprobado' :
+        u.estado === 'pendiente' ? 'insignia-pendiente' :
+        'insignia-rechazado';
+
+      const texto =
+        u.es_admin ? 'Administrador' :
+        u.estado === 'aprobado' ? 'Aprobado' :
+        u.estado === 'pendiente' ? 'Pendiente' : 'Rechazado';
+
+      // ---- Botones según el estado del usuario ----
+      // Nunca aparecen para el propio administrador (para que
+      // no pueda bloquearse a sí mismo sin querer).
+      let acciones = '';
+      const esYo = u.id === adminId;
+
+      if (!u.es_admin && !esYo) {
+        if (u.estado === 'pendiente') {
+          // Pendiente → puede aprobar o rechazar
+          acciones = `
+            <form method="POST" action="/auth/aprobar">
+              <input type="hidden" name="id" value="${u.id}">
+              <button type="submit" class="btn btn-verde btn-mini">✅ Aprobar</button>
+            </form>
+            <form method="POST" action="/auth/rechazar">
+              <input type="hidden" name="id" value="${u.id}">
+              <button type="submit" class="btn btn-peligro btn-mini">❌ Rechazar</button>
+            </form>`;
+        } else if (u.estado === 'rechazado') {
+          // Rechazado → CORREGIR el error: aprobarlo otra vez
+          acciones = `
+            <form method="POST" action="/auth/aprobar">
+              <input type="hidden" name="id" value="${u.id}">
+              <button type="submit" class="btn btn-verde btn-mini"
+                      title="Corregir el rechazo">✅ Aprobar</button>
+            </form>`;
+        } else if (u.estado === 'aprobado') {
+          // Aprobado → quitarle el acceso si hace falta
+          acciones = `
+            <form method="POST" action="/auth/rechazar"
+                  onsubmit="return confirm('¿Revocar el acceso de ${limpio(u.nombre)}?')">
+              <input type="hidden" name="id" value="${u.id}">
+              <button type="submit" class="btn btn-peligro btn-mini">🚫 Revocar</button>
+            </form>`;
+        }
+      }
+
+      const fila = document.createElement('div');
+      fila.className = 'usuario-fila';
+      fila.innerHTML = `
+        <div class="usuario-info">
+          <div class="avatar">${u.nombre.charAt(0)}</div>
+          <div class="usuario-datos">
+            <div class="nombre">${u.nombre}</div>
+            <div class="email">${u.email}</div>
+          </div>
+        </div>
+        <div class="usuario-acciones">
+          <span class="insignia ${insignia}">${texto}</span>
+          ${acciones}
+        </div>`;
+      listaTodos.appendChild(fila);
+    });
+
+    // ---------- Subida de archivos: mostrar nombre elegido ----------
+    document.querySelector('input[name="video"]').addEventListener('change', e => {
+      if (e.target.files[0]) {
+        document.getElementById('texto-video').textContent =
+          '🎬 ' + e.target.files[0].name;
+      }
+    });
+    document.querySelector('input[name="miniatura"]').addEventListener('change', e => {
+      if (e.target.files[0]) {
+        document.getElementById('texto-miniatura').textContent =
+          '🖼 ' + e.target.files[0].name;
+      }
+    });
+
+    // ---------- Aviso mientras se sube el vídeo ----------
+    document.getElementById('form-subida').addEventListener('submit', () => {
+      document.getElementById('aviso-subida').style.display = 'block';
+      document.getElementById('btn-subir').disabled = true;
+      document.getElementById('btn-subir').textContent = 'Subiendo…';
+    });
+  </script>
+
+</body>
+</html>

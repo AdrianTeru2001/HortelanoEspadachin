@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio · Hortelano Espadachín</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+
+  <!-- ========== BARRA DE NAVEGACIÓN ========== -->
+  <header class="barra-superior" id="barra">
+    <a href="/" class="logo no-seleccion">HORTELANO <span>ESPADACHÍN</span></a>
+
+    <nav class="nav-enlaces">
+      <a href="/" class="activo">Inicio</a>
+      <a href="/capitulos">Todos los capítulos</a>
+      {{enlaceAdmin}}
+    </nav>
+
+    <div class="menu-usuario">
+      <span class="nombre-usuario">{{usuario}}</span>
+      <div class="avatar no-seleccion" title="{{usuario}}">
+        {{usuario}}
+      </div>
+      <form method="POST" action="/auth/logout">
+        <button type="submit" class="btn btn-gris btn-mini">Salir</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- ========== BANNER DESTACADO ========== -->
+  <section class="banner" id="banner">
+    <div class="banner-contenido">
+      <div class="banner-etiqueta">Serie original de PingaFlix</div>
+      <h1 class="banner-titulo" id="banner-titulo">Cargando…</h1>
+      <p class="banner-sinopsis" id="banner-sinopsis"></p>
+      <div class="banner-botones">
+        <button class="btn btn-rojo" id="btn-ver-destacado">▶ Ver ahora</button>
+        <a href="/capitulos" class="btn btn-fantasma">Ver todos los capítulos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FILAS DE CAPÍTULOS ========== -->
+  <div class="zona-filas">
+    <div class="fila">
+      <h2 class="fila-titulo">Todos los capítulos</h2>
+      <div class="fila-vista" id="fila-principal"></div>
+    </div>
+
+    <!-- Esta segunda fila se rellena con los capítulos de la
+         última temporada, para dar esa sensación de Netflix -->
+    <div class="fila" id="fila-recientes-bloque" style="display:none">
+      <h2 class="fila-titulo">Lo más reciente</h2>
+      <div class="fila-vista" id="fila-recientes"></div>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------------------------------------
+    // Los capítulos llegan desde el servidor como texto JSON
+    // dentro de {{capitulosJSON}}. JSON.parse lo convierte en
+    // un array de objetos que podemos usar en JavaScript.
+    // ---------------------------------------------------------
+    const capitulos = {{capitulosJSON}};
+
+    // ---------- Pintar una tarjeta de capítulo ----------
+    function crearTarjeta(c) {
+      const enlace = document.createElement('a');
+      enlace.href = '/capitulo/' + c.id;
+      enlace.className = 'tarjeta';
+
+      // Si no hay miniatura, mostramos un placeholder con la
+      // primera letra del título
+      const imagen = c.miniatura
+        ? `<img class="tarjeta-imagen" src="${c.miniatura}" alt="${c.titulo}"
+                 loading="lazy">`
+        : `<div class="tarjeta-imagen placeholder">${c.titulo.charAt(0)}</div>`;
+
+      enlace.innerHTML = `
+        ${imagen}
+        <div class="tarjeta-play"></div>
+        <div class="tarjeta-cuerpo">
+          <div class="tarjeta-etiqueta">${c.etiqueta}</div>
+          <div class="tarjeta-titulo">${c.titulo}</div>
+          <div class="tarjeta-sinopsis">${c.sinopsis || ''}</div>
+          <div class="tarjeta-pie">
+            <span>Episodio ${c.episodio}</span>
+            <span>${c.duracion || ''}</span>
+          </div>
+        </div>`;
+      return enlace;
+    }
+
+    // ---------- Rellenar las filas ----------
+    const filaPrincipal = document.getElementById('fila-principal');
+
+    if (capitulos.length === 0) {
+      // Estado vacío: aún no hay capítulos subidos
+      filaPrincipal.innerHTML = `
+        <div class="vacio" style="width:100%">
+          <h3>Aún no hay capítulos</h3>
+          <p>El administrador todavía no ha subido nada. Vuelve pronto.</p>
+        </div>`;
+    } else {
+      capitulos.forEach(c => filaPrincipal.appendChild(crearTarjeta(c)));
+
+      // Fila "lo más reciente": los últimos 8 capítulos
+      const recientes = [...capitulos].slice(-8).reverse();
+      const bloqueRecientes = document.getElementById('fila-recientes-bloque');
+      const filaRecientes = document.getElementById('fila-recientes');
+      if (recientes.length > 1) {
+        bloqueRecientes.style.display = 'block';
+        recientes.forEach(c => filaRecientes.appendChild(crearTarjeta(c)));
+      }
+    }
+
+    // ---------- Configurar el banner destacado ----------
+    const destacado = {{destacadoJSON}};
+
+    if (destacado.id) {
+      document.getElementById('banner-titulo').textContent = destacado.titulo;
+      document.getElementById('banner-sinopsis').textContent = destacado.sinopsis;
+
+      // Si hay miniatura, la usamos de fondo del banner
+      if (destacado.miniatura) {
+        document.getElementById('banner').style.backgroundImage =
+          `url('${destacado.miniatura}')`;
+      }
+
+      document.getElementById('btn-ver-destacado').onclick = () => {
+        window.location.href = '/capitulo/' + destacado.id;
+      };
+    } else {
+      document.getElementById('banner-titulo').textContent = 'Bienvenido';
+      document.getElementById('banner-sinopsis').textContent =
+        'Todavía no hay capítulos disponibles.';
+      document.getElementById('btn-ver-destacado').style.display = 'none';
+    }
+
+    // ---------- Barra que se vuelve sólida al hacer scroll ----------
+    const barra = document.getElementById('barra');
+    window.addEventListener('scroll', () => {
+      barra.classList.toggle('fija', window.scrollY > 40);
+    });
+  </script>
+
+</body>
+</html>

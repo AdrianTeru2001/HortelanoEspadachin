@@ -1,0 +1,1067 @@
+/* ============================================================
+   estilos.css — El aspecto visual de la web (estilo Netflix)
+   ------------------------------------------------------------
+   ESTRUCTURA DE ESTE ARCHIVO:
+     1. Variables de color (la paleta de la web)
+     2. Reset y estilos base
+     3. Botones
+     4. Formularios (login/registro)
+     5. Cabecera / barra de navegación
+     6. Home (banner destacado + filas de capítulos)
+     7. Catálogo (cuadrícula + buscador)
+     8. Página del capítulo (reproductor)
+     9. Pantallas de estado (esperando, rechazado)
+    10. Panel de administración
+    11. Responsive (móvil)
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. VARIABLES DE COLOR
+   Estas son las "recetas de color" que usaremos por toda la
+   web. Si cambias el rojo de aquí, cambia en TODA la web.
+   ------------------------------------------------------------ */
+:root {
+  --rojo: #e50914;          /* El rojo característico de Netflix */
+  --rojo-oscuro: #b20710;
+  --fondo: #141414;         /* Fondo casi negro */
+  --fondo-2: #1f1f1f;       /* Tarjetas y paneles */
+  --fondo-3: #2a2a2a;       /* Elementos elevados */
+  --texto: #ffffff;
+  --texto-tenue: #b3b3b3;   /* Texto secundario (gris) */
+  --borde: #333;
+  --exito: #46d369;
+  --aviso: #ffc312;
+  --peligro: #e50914;
+  --radio: 6px;             /* Esquinas redondeadas */
+}
+
+/* ------------------------------------------------------------
+   2. RESET Y BASE
+   "Reset" = anular los estilos por defecto del navegador
+   para que todo se comporte igual en Chrome, Firefox, etc.
+   ------------------------------------------------------------ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Evita que el texto seleccione mientras navegas */
+.no-seleccion {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ------------------------------------------------------------
+   3. BOTONES
+   ------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: var(--radio);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, opacity 0.15s;
+  text-align: center;
+}
+
+.btn:hover {
+  transform: scale(1.03);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-rojo {
+  background-color: var(--rojo);
+  color: #fff;
+}
+.btn-rojo:hover {
+  background-color: var(--rojo-oscuro);
+}
+
+.btn-gris {
+  background-color: var(--fondo-3);
+  color: #fff;
+}
+.btn-gris:hover {
+  background-color: #383838;
+}
+
+.btn-fantasma {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+.btn-fantasma:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.btn-verde {
+  background-color: var(--exito);
+  color: #06290f;
+}
+.btn-verde:hover {
+  background-color: #3bb85c;
+}
+
+.btn-peligro {
+  background-color: transparent;
+  color: var(--peligro);
+  border: 1px solid var(--peligro);
+}
+.btn-peligro:hover {
+  background-color: var(--peligro);
+  color: #fff;
+}
+
+.btn-mini {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* ------------------------------------------------------------
+   4. FORMULARIOS (login / registro)
+   ------------------------------------------------------------ */
+.pantalla-acceso {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)),
+    radial-gradient(ellipse at top, #2b0b0e 0%, var(--fondo) 70%);
+}
+
+.caja-acceso {
+  width: 100%;
+  max-width: 420px;
+  background-color: rgba(0, 0, 0, 0.75);
+  border-radius: 8px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.logo-acceso {
+  color: var(--rojo);
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.subtitulo-acceso {
+  color: var(--texto-tenue);
+  margin-bottom: 28px;
+  font-size: 15px;
+}
+
+.campo {
+  margin-bottom: 16px;
+}
+
+.campo label {
+  display: block;
+  font-size: 13px;
+  color: var(--texto-tenue);
+  margin-bottom: 6px;
+}
+
+.campo input,
+.campo textarea,
+.campo select {
+  width: 100%;
+  padding: 13px 15px;
+  background-color: #333;
+  border: 1px solid #4d4d4d;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus {
+  outline: none;
+  border-color: var(--rojo);
+  background-color: #3d3d3d;
+}
+
+.campo textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Mensajes de error y éxito */
+.aviso {
+  padding: 12px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+.aviso-error {
+  background-color: rgba(229, 9, 20, 0.15);
+  border-left: 3px solid var(--rojo);
+  color: #ff8a8f;
+}
+.aviso-exito {
+  background-color: rgba(70, 211, 105, 0.15);
+  border-left: 3px solid var(--exito);
+  color: var(--exito);
+}
+.aviso-info {
+  background-color: rgba(255, 195, 18, 0.12);
+  border-left: 3px solid var(--aviso);
+  color: var(--aviso);
+}
+
+.enlace-inferior {
+  margin-top: 20px;
+  color: var(--texto-tenue);
+  font-size: 14px;
+}
+.enlace-inferior a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.nota-primero {
+  background-color: rgba(229, 9, 20, 0.1);
+  border: 1px solid rgba(229, 9, 20, 0.4);
+  padding: 12px 15px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--texto-tenue);
+  margin-bottom: 20px;
+}
+
+/* ------------------------------------------------------------
+   5. CABECERA / BARRA DE NAVEGACIÓN
+   ------------------------------------------------------------ */
+.barra-superior {
+  position: sticky;    /* Se queda pegada arriba al hacer scroll */
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4%;
+  height: 68px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 10%, transparent);
+  transition: background-color 0.3s;
+}
+
+/* Cuando el usuario baja la página, la barra se vuelve sólida */
+.barra-superior.fija {
+  background-color: rgba(20, 20, 20, 0.97);
+}
+
+.logo {
+  color: var(--rojo);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.logo span {
+  color: #fff;
+}
+
+.nav-enlaces {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 14px;
+}
+
+.nav-enlaces a {
+  color: var(--texto-tenue);
+  transition: color 0.15s;
+}
+.nav-enlaces a:hover,
+.nav-enlaces a.activo {
+  color: #fff;
+}
+
+.menu-usuario {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 5px;
+  background-color: var(--rojo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+
+.nombre-usuario {
+  font-size: 14px;
+  color: var(--texto-tenue);
+}
+
+/* ------------------------------------------------------------
+   6. HOME — BANNER DESTACADO + FILAS DE CAPÍTULOS
+   ------------------------------------------------------------ */
+
+/* --- Banner principal (el "hero") --- */
+.banner {
+  position: relative;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  padding: 0 4%;
+  background-size: cover;
+  background-position: center top;
+}
+
+/* Degradado para que el texto se lea sobre la imagen */
+.banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(77deg, rgba(0, 0, 0, 0.85) 0%, transparent 60%),
+    linear-gradient(0deg, var(--fondo) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+.banner-contenido {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+}
+
+.banner-etiqueta {
+  font-size: 14px;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.banner-titulo {
+  font-size: clamp(38px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 18px;
+  text-shadow: 2px 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.banner-sinopsis {
+  font-size: 17px;
+  color: #e5e5e5;
+  margin-bottom: 26px;
+  max-width: 540px;
+  text-shadow: 1px 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.banner-botones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* --- Zona de filas --- */
+.zona-filas {
+  position: relative;
+  z-index: 3;
+  margin-top: -80px;   /* Las filas "suben" sobre el banner, como Netflix */
+  padding-bottom: 60px;
+}
+
+.fila {
+  margin-bottom: 34px;
+}
+
+.fila-titulo {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding: 0 4%;
+}
+
+/* Contenedor con scroll horizontal */
+.fila-vista {
+  padding: 0 4%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rojo) var(--fondo-2);
+  padding-bottom: 8px;
+}
+
+.fila-vista::-webkit-scrollbar {
+  height: 8px;
+}
+.fila-vista::-webkit-scrollbar-track {
+  background: var(--fondo-2);
+  border-radius: 4px;
+}
+.fila-vista::-webkit-scrollbar-thumb {
+  background: var(--rojo);
+  border-radius: 4px;
+}
+
+/* --- Tarjeta de capítulo --- */
+.tarjeta {
+  flex: 0 0 auto;
+  width: 260px;
+  margin-right: 12px;
+  border-radius: var(--radio);
+  overflow: hidden;
+  background-color: var(--fondo-2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.tarjeta:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+  z-index: 5;
+}
+
+.tarjeta-imagen {
+  width: 100%;
+  height: 146px;
+  object-fit: cover;
+  background-color: var(--fondo-3);
+}
+
+/* Placeholder cuando no hay miniatura */
+.tarjeta-imagen.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto-tenue);
+  font-size: 40px;
+}
+
+.tarjeta-cuerpo {
+  padding: 12px 14px;
+}
+
+.tarjeta-etiqueta {
+  font-size: 11px;
+  color: var(--rojo);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.tarjeta-titulo {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tarjeta-sinopsis {
+  font-size: 12px;
+  color: var(--texto-tenue);
+  margin-top: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tarjeta-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--texto-tenue);
+}
+
+/* Botón "ver" que aparece al pasar el ratón */
+.tarjeta-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background-color: rgba(229, 9, 20, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.tarjeta:hover .tarjeta-play {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.tarjeta-play::after {
+  content: '';
+  border-style: solid;
+  border-width: 11px 0 11px 18px;
+  border-color: transparent transparent transparent #fff;
+  margin-left: 4px;
+}
+
+/* Estado vacío (no hay capítulos) */
+.vacio {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--texto-tenue);
+}
+.vacio h3 {
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* ------------------------------------------------------------
+   7. CATÁLOGO — CUADRÍCULA + BUSCADOR
+   ------------------------------------------------------------ */
+.pagina-contenido {
+  padding: 100px 4% 60px;
+  min-height: 100vh;
+}
+
+.pagina-titulo {
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.pagina-subtitulo {
+  color: var(--texto-tenue);
+  margin-bottom: 26px;
+}
+
+/* Barra de herramientas (buscador + filtros) */
+.barra-herramientas {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+.buscador {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 16px;
+  background-color: var(--fondo-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: #fff;
+  font-size: 15px;
+}
+.buscador:focus {
+  outline: none;
+  border-color: var(--rojo);
+}
+
+.filtro-temporada {
+  padding: 12px 16px;
+  background-color: var(--fondo-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.filtro-temporada:focus {
+  outline: none;
+  border-color: var(--rojo);
+}
+
+/* Cuadrícula de tarjetas */
+.cuadricula {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 22px;
+}
+
+.cuadricula .tarjeta {
+  width: 100%;
+  margin-right: 0;
+}
+.cuadricula .tarjeta-imagen {
+  height: 150px;
+}
+
+.resultado-vacio {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px;
+  color: var(--texto-tenue);
+}
+
+/* ------------------------------------------------------------
+   8. PÁGINA DEL CAPÍTULO — REPRODUCTOR
+   ------------------------------------------------------------ */
+.pagina-capitulo {
+  padding: 96px 4% 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-tenue);
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+.volver:hover {
+  color: #fff;
+}
+
+/* Contenedor del vídeo */
+.reproductor-marco {
+  position: relative;
+  width: 100%;
+  background-color: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.reproductor-marco video {
+  display: block;
+  width: 100%;
+  max-height: 72vh;
+  background-color: #000;
+}
+
+/* Ficha del capítulo */
+.ficha-capitulo {
+  margin-top: 26px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.ficha-texto {
+  flex: 1;
+  min-width: 280px;
+}
+
+.ficha-etiqueta {
+  color: var(--rojo);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.ficha-titulo {
+  font-size: clamp(26px, 4vw, 40px);
+  font-weight: 800;
+  margin: 6px 0 12px;
+}
+
+.ficha-meta {
+  display: flex;
+  gap: 16px;
+  color: var(--texto-tenue);
+  font-size: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.ficha-meta .puntuacion {
+  color: var(--exito);
+  font-weight: 700;
+}
+
+.ficha-sinopsis {
+  color: #d4d4d4;
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 760px;
+}
+
+/* Botón siguiente episodio */
+.siguiente-episodio {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--borde);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.siguiente-info .etiqueta {
+  font-size: 12px;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.siguiente-info .titulo {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------
+   9. PANTALLAS DE ESTADO (esperando / rechazado)
+   ------------------------------------------------------------ */
+.pantalla-estado {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at center, #2b0b0e 0%, var(--fondo) 70%);
+}
+
+.tarjeta-estado {
+  max-width: 480px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 48px 36px;
+}
+
+.icono-estado {
+  font-size: 60px;
+  margin-bottom: 18px;
+}
+
+.tarjeta-estado h1 {
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+
+.tarjeta-estado p {
+  color: var(--texto-tenue);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+/* Punto pulsante de "esperando" */
+.punto-espera {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--aviso);
+  margin-left: 6px;
+  animation: latido 1.2s infinite;
+}
+
+@keyframes latido {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+/* ------------------------------------------------------------
+   10. PANEL DE ADMINISTRACIÓN
+   ------------------------------------------------------------ */
+.panel {
+  padding: 100px 4% 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.panel-titulo {
+  font-size: 34px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.panel-subtitulo {
+  color: var(--texto-tenue);
+  margin-bottom: 30px;
+}
+
+/* Tarjetas de estadísticas */
+.estadisticas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 34px;
+}
+
+.estadistica {
+  background-color: var(--fondo-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 20px;
+}
+.estadistica .valor {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--rojo);
+}
+.estadistica .etiqueta {
+  font-size: 13px;
+  color: var(--texto-tenue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Secciones del panel */
+.seccion-panel {
+  background-color: var(--fondo-2);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 26px;
+  margin-bottom: 28px;
+}
+
+.seccion-panel h2 {
+  font-size: 20px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.seccion-panel .descripcion {
+  color: var(--texto-tenue);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Lista de usuarios pendientes */
+.lista-usuarios {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.usuario-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: var(--fondo-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 14px 18px;
+  flex-wrap: wrap;
+}
+
+.usuario-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.usuario-datos .nombre {
+  font-weight: 700;
+  font-size: 15px;
+}
+.usuario-datos .email {
+  font-size: 13px;
+  color: var(--texto-tenue);
+}
+
+.usuario-acciones {
+  display: flex;
+  gap: 10px;
+}
+
+/* Insignias de estado */
+.insignia {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.insignia-pendiente {
+  background-color: rgba(255, 195, 18, 0.18);
+  color: var(--aviso);
+}
+.insignia-aprobado {
+  background-color: rgba(70, 211, 105, 0.18);
+  color: var(--exito);
+}
+.insignia-rechazado {
+  background-color: rgba(229, 9, 20, 0.18);
+  color: #ff8a8f;
+}
+.insignia-admin {
+  background-color: rgba(229, 9, 20, 0.25);
+  color: #fff;
+}
+
+/* Formulario de subida */
+.formulario-subida {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.formulario-subida .campo-ancho {
+  grid-column: 1 / -1;
+}
+
+.campo-archivo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #333;
+  border: 1px dashed #666;
+  border-radius: 4px;
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.campo-archivo:hover {
+  border-color: var(--rojo);
+  background-color: #3a3a3a;
+}
+.campo-archivo input[type='file'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.campo-archivo .texto-archivo {
+  font-size: 14px;
+  color: var(--texto-tenue);
+}
+
+/* Tabla de capítulos en el panel */
+.tabla-capitulos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabla-capitulos th {
+  text-align: left;
+  padding: 10px 12px;
+  background-color: var(--fondo-3);
+  color: var(--texto-tenue);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tabla-capitulos td {
+  padding: 12px;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla-capitulos tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.miniatura-tabla {
+  width: 70px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  background-color: var(--fondo-3);
+}
+
+/* ------------------------------------------------------------
+   11. RESPONSIVE (móvil y tablet)
+   ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .barra-superior {
+    height: 60px;
+    padding: 0 4%;
+  }
+
+  .nav-enlaces {
+    gap: 14px;
+    font-size: 13px;
+  }
+
+  .nombre-usuario {
+    display: none;   /* En móvil escondemos el nombre */
+  }
+
+  .banner {
+    min-height: 60vh;
+  }
+
+  .zona-filas {
+    margin-top: -40px;
+  }
+
+  .tarjeta {
+    width: 200px;
+  }
+
+  .tarjeta-imagen {
+    height: 112px;
+  }
+
+  .caja-acceso {
+    padding: 34px 24px;
+  }
+
+  .pagina-capitulo,
+  .pagina-contenido,
+  .panel {
+    padding-top: 84px;
+  }
+
+  .usuario-fila {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-enlaces a.ocultar-movil {
+    display: none;
+  }
+
+  .banner-botones {
+    width: 100%;
+  }
+  .banner-botones .btn {
+    flex: 1;
+  }
+}
