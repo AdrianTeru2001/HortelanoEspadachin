@@ -288,6 +288,7 @@ img {
   align-items: center;
   justify-content: space-between;
   padding: 0 4%;
+  min-width: 0;
   height: 68px;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 10%, transparent);
   transition: background-color 0.3s;
@@ -303,6 +304,7 @@ img {
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 .logo span {
   color: #fff;
@@ -313,6 +315,7 @@ img {
   align-items: center;
   gap: 22px;
   font-size: 14px;
+  min-width: 0;
 }
 
 .nav-enlaces a {
@@ -328,6 +331,7 @@ img {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .avatar {
@@ -361,6 +365,7 @@ img {
 .banner {
   position: relative;
   min-height: 72vh;
+  min-height: 72svh;
   display: flex;
   align-items: center;
   padding: 0 4%;
@@ -645,8 +650,8 @@ img {
   margin-right: 0;
 }
 .cuadricula .tarjeta-imagen {
-  height: 150px;
-  aspect-ratio: auto;
+  height: auto;
+  aspect-ratio: 16 / 9;
 }
 
 .resultado-vacio {
@@ -825,6 +830,7 @@ img {
    ------------------------------------------------------------ */
 .panel {
   padding: 100px 4% 60px;
+  width: 100%;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -1029,6 +1035,7 @@ img {
 /* Tabla de capítulos en el panel */
 .tabla-capitulos {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -1112,52 +1119,285 @@ img {
 }
 
 /* ------------------------------------------------------------
-   11. RESPONSIVE (móvil y tablet)
+   11. RESPONSIVE (escritorio, tablet y móvil)
    ------------------------------------------------------------ */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .barra-superior {
-    height: 60px;
-    padding: 0 4%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    gap: 8px 16px;
+    height: auto;
+    min-height: 68px;
+    padding: 10px 4% 12px;
+  }
+
+  .barra-superior > .logo {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    justify-self: start;
+    width: max-content;
+  }
+
+  .barra-superior > .nav-enlaces {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+
+  .barra-superior > .menu-usuario {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
   }
 
   .nav-enlaces {
-    gap: 14px;
-    font-size: 13px;
-  }
-
-  .nombre-usuario {
-    display: none;   /* En móvil escondemos el nombre */
+    font-size: 14px;
   }
 
   .banner {
-    min-height: 60vh;
+    min-height: 64vh;
+    min-height: 64svh;
+    background-position: center;
   }
 
   .zona-filas {
-    margin-top: -40px;
+    margin-top: -48px;
   }
 
-  .tarjeta {
-    width: 200px;
+  .pagina-contenido,
+  .pagina-capitulo,
+  .panel {
+    padding-top: 40px;
   }
 
-  .tarjeta-imagen {
-    height: 112px;
+  .pagina-contenido {
+    min-height: 0;
+  }
+
+  .pagina-contenido,
+  .pagina-capitulo,
+  .panel {
+    padding-right: 5%;
+    padding-left: 5%;
+  }
+
+  .seccion-panel {
+    padding: 22px;
+  }
+
+  .estadisticas {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  #lista-todos .usuario-acciones {
+    min-width: 250px;
   }
 
   .caja-acceso {
-    padding: 34px 24px;
+    padding: 38px 32px;
   }
 
-  .pagina-capitulo,
+  .tarjeta {
+    width: 230px;
+  }
+}
+
+@media (max-width: 600px) {
+  .barra-superior {
+    gap: 8px 10px;
+    padding: 9px 5% 11px;
+  }
+
+  .logo {
+    font-size: clamp(18px, 5vw, 23px);
+  }
+
+  .nav-enlaces {
+    gap: 7px 16px;
+    font-size: 13px;
+  }
+
+  .menu-usuario {
+    gap: 8px;
+  }
+
+  .nombre-usuario {
+    display: block;
+    max-width: 28vw;
+    font-size: 12px;
+  }
+
+  .menu-usuario .btn {
+    padding: 7px 11px;
+    font-size: 12px;
+  }
+
+  .banner {
+    min-height: 62vh;
+    min-height: 62svh;
+    padding: 30px 5% 72px;
+    background-position: 58% center;
+  }
+
+  .banner-contenido {
+    max-width: 100%;
+  }
+
+  .banner-etiqueta {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+
+  .banner-titulo {
+    font-size: clamp(34px, 10vw, 52px);
+    margin-bottom: 12px;
+  }
+
+  .banner-sinopsis {
+    font-size: 15px;
+    margin-bottom: 18px;
+  }
+
+  .zona-filas {
+    margin-top: -34px;
+    padding-bottom: 36px;
+  }
+
+  .fila {
+    margin-bottom: 26px;
+  }
+
+  .fila-titulo {
+    padding: 0 5%;
+    font-size: 18px;
+  }
+
+  .fila-vista {
+    gap: 12px;
+    padding-right: 5%;
+    padding-left: 5%;
+  }
+
+  .tarjeta {
+    width: min(72vw, 230px);
+  }
+
+  .tarjeta-cuerpo {
+    padding: 10px 12px;
+  }
+
   .pagina-contenido,
+  .pagina-capitulo,
   .panel {
-    padding-top: 84px;
+    padding: 32px 5% 40px;
+  }
+
+  .pagina-titulo,
+  .panel-titulo {
+    font-size: clamp(26px, 8vw, 34px);
+  }
+
+  .barra-herramientas {
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .buscador,
+  .filtro-temporada {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cuadricula {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .cuadricula .tarjeta-titulo {
+    font-size: 13px;
+  }
+
+  .cuadricula .tarjeta-cuerpo {
+    padding: 9px;
+  }
+
+  .pagina-capitulo {
+    padding-top: 28px;
+  }
+
+  .reproductor-marco {
+    border-radius: 5px;
+  }
+
+  .reproductor-marco video {
+    max-height: 56vh;
+    max-height: 56svh;
+  }
+
+  .ficha-titulo {
+    font-size: clamp(24px, 7vw, 34px);
+  }
+
+  .ficha-sinopsis {
+    font-size: 15px;
+  }
+
+  .siguiente-episodio {
+    align-items: stretch;
+  }
+
+  .siguiente-episodio > .btn {
+    width: 100%;
+  }
+
+  .panel {
+    padding-top: 32px;
+  }
+
+  .seccion-panel {
+    padding: 18px 14px;
+    margin-bottom: 18px;
+  }
+
+  .seccion-panel h2 {
+    font-size: 18px;
+  }
+
+  .estadisticas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .estadistica {
+    padding: 14px;
+  }
+
+  .estadistica .valor {
+    font-size: 26px;
+  }
+
+  .estadistica .etiqueta {
+    font-size: 10px;
   }
 
   .usuario-fila {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    padding: 12px;
+  }
+
+  .usuario-info {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .usuario-datos {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   #lista-todos .usuario-fila {
@@ -1168,22 +1408,90 @@ img {
     width: 100%;
     min-width: 0;
     justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .firma-sitio {
-    font-size: 10px;
+    gap: 8px;
+    padding: 8px;
   }
 
-  .nav-enlaces a.ocultar-movil {
-    display: none;
+  #lista-todos .usuario-acciones .btn {
+    min-width: 0;
+    padding: 8px 11px;
+  }
+
+  .formulario-subida,
+  .formulario-edicion-capitulo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .formulario-subida .campo-ancho,
+  .formulario-edicion-capitulo .campo-ancho {
+    grid-column: auto;
+  }
+
+  .caja-acceso {
+    padding: 32px 24px;
+  }
+
+  .logo-acceso {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+
+  .pantalla-estado {
+    padding: 18px;
+  }
+
+  .tarjeta-estado {
+    width: 100%;
+    padding: 34px 22px;
+  }
+
+  .tarjeta-estado h1 {
+    font-size: 24px;
   }
 
   .banner-botones {
+    gap: 9px;
+  }
+
+  .banner-botones .btn {
+    flex: 1 1 145px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .nav-enlaces a.ocultar-movil {
+    display: inline;
+  }
+
+  .resultado-vacio {
+    grid-column: 1 / -1;
+    padding: 32px 12px;
+  }
+
+  .firma-sitio {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .barra-superior > .nav-enlaces {
+    gap: 7px 12px;
+    font-size: 12px;
+  }
+
+  .nombre-usuario {
+    display: none;
+  }
+
+  .cuadricula {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cuadricula .tarjeta {
     width: 100%;
   }
-  .banner-botones .btn {
-    flex: 1;
+
+  .caja-acceso {
+    padding: 28px 18px;
   }
 }
